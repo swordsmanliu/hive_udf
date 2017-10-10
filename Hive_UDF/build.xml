@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build-project">
+	<!-- init -->
+	<target name="init">
+		<echo>+-------------------------------------------------------+</echo>
+		<echo>| Initialization |</echo>
+		<echo>+-------------------------------------------------------+</echo>
+
+		<tstamp>
+			<format property="build.time" pattern="MM/dd/yyyy hh:mm aa" />
+		</tstamp>
+		<property file="build.properties" />
+		<property name="project.root.dir" value="." />
+		<property name="project.name" value="${project.name}" />
+		<property name="project.version" value="${project.version}" />
+		<property name="project.lib.dir" value="${project.root.dir}/lib" />
+		<property name="project.src.dir" value="${project.root.dir}/src/main/java" />
+		<property name="project.config.dir" value="${project.root.dir}/src/main/source/conf" />
+		<property name="project.build.dir" value="${project.root.dir}/build" />
+		<property name="project.output.dir" value="${project.root.dir}/jar" />
+		<property name="project.author" value="rootwang" />
+
+		<path id="extern-jar">
+			<fileset dir="${project.lib.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</path>
+	</target>
+
+	<!-- clean -->
+	<target name="clean" depends="init">
+		<echo>+-------------------------------------------------------+</echo>
+		<echo>| Clean old folders |</echo>
+		<echo>+-------------------------------------------------------+</echo>
+		<delete dir="${project.build.dir}" verbose="yes" />
+		<mkdir dir="${project.build.dir}" />
+	</target>
+
+	<!-- clean-project-->
+	<target name="clean-project" depends="init,clean">
+	</target>
+
+	<!-- complie project-->
+	<target name="compile-project" depends="init">
+		<echo>+-------------------------------------------------------+</echo>
+		<echo>| COMPILING java SOURCE CODE |</echo>
+		<echo>+-------------------------------------------------------+</echo>
+
+		<javac destdir="${project.build.dir}" debug="on" encoding="UTF-8" deprecation="on" includeAntRuntime="false">
+			<src path="${project.src.dir}" />
+			<include name="**/*.java" />
+			<include name="**/*.properties" />
+			<classpath>
+				<path refid="extern-jar" />
+				<pathelement location="${project.build.dir}" />
+			</classpath>
+		</javac>
+	</target>
+
+	<!-- jar project-->
+	<target name="jar-project" depends="init">
+		<echo>+-------------------------------------------------------+</echo>
+		<echo>| Archive jar |</echo>
+		<echo>+-------------------------------------------------------+</echo>
+
+		<jar jarfile="${project.output.dir}/${project.name}-${project.version}.jar">
+			<fileset dir="${project.build.dir}" includes="**" />
+			<!--fileset dir="${project.src.dir}" includes="**/*.java" /-->
+			<fileset dir="${project.config.dir}" includes="*.*"/>
+
+			<manifest>
+				<attribute name="Manifest-Version" value="${project.version}" />
+				<attribute name="Created-By" value="${project.author}" />
+				<!-- attribute name="Main-Class" value="com.ideal.tag.main.TaggingDistributedCacheRunner" /-->
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- jar project-->
+		<target name="deploy" depends="init,compile-project">
+			<echo>+-------------------------------------------------------+</echo>
+			<echo>| Archive jar |</echo>
+			<echo>+-------------------------------------------------------+</echo>
+
+			<jar jarfile="${project.output.dir}/${project.name}-${project.version}.jar">
+				<fileset dir="${project.build.dir}" includes="**" />
+				<fileset dir="${project.config.dir}" includes="*.properties"/>
+
+				<restrict>
+					<name name="**/*.class" />
+					<archives>
+						<zips>
+							<fileset dir="${project.lib.dir}" includes="**/*.jar" />
+						</zips>
+					</archives>
+				</restrict>
+				<manifest>
+					<attribute name="Manifest-Version" value="${project.version}" />
+					<attribute name="Created-By" value="${project.author}" />
+					<!--attribute name="Main-Class" value="com.ideal.tag.main.TaggingDistributedCacheRunner" /-->
+				</manifest>
+			</jar>
+		</target>
+
+	<target name="build-project" depends="clean-project,compile-project,jar-project" />
+
+</project>
